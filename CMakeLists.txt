@@ -4,8 +4,15 @@ project( Face-Tracking-Maya )
 
 find_package( OpenCV REQUIRED )
 
+#static please!
+if(MSVC)
+  set(CMAKE_CXX_FLAGS_RELEASE "/MT")
+  set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
+endif(MSVC)
+
 # Include directories
 include_directories( ${OpenCV_INCLUDE_DIRS} )
+include_directories( ${PROJECT_SOURCE_DIR}/include/ )
 
 # Generate lists
 file(GLOB PROJECT_SOURCES src/*.cpp)
