@@ -29,10 +29,15 @@ void detectAndShow(Mat frame)
     //        params.minCircularity = 0.9;
     params.filterByConvexity = true; // How convex/concave blobs can be
     params.minConvexity = 0.90;
-    
+#if CV_MAJOR_VERSION < 3
     SimpleBlobDetector detector(params);
     std::vector<KeyPoint> keypoints;
     detector.detect( frame, keypoints);
+#else
+    Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);   
+    std::vector<KeyPoint> keypoints;
+    detector->detect( frame, keypoints);
+#endif
     
     Mat frame_with_keypoints;
     drawKeypoints( frame, keypoints, frame_with_keypoints, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
