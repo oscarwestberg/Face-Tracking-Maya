@@ -15,8 +15,8 @@
 	along with TDSocket.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __SOCKET_INCLUDED
-#define __SOCKET_INCLUDED
+#ifndef __SOCKET_H
+#define __SOCKET_H
 
 #include <cstdlib>
 #include <cstdio>
@@ -35,9 +35,6 @@
 	#include <arpa/inet.h>
 	#include <sys/wait.h>
 #endif
-
-namespace TD
-{
 
 /**
  * Simple C++ socket wrapper.
@@ -222,6 +219,4 @@ class Socket
 		#endif
 };
 
-}
-
-#endif
+#endif 	/* SOCKET_H */

@@ -15,14 +15,11 @@
 	along with TDSocket.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Socket.hpp"
+#include "Socket.h"
 
 #ifdef WIN32
 	typedef int socklen_t;
 #endif
-
-namespace TD
-{
 
 Socket::Socket(int type, int domain, int protocol)
 {	
@@ -51,6 +48,9 @@ Socket::Socket(int new_fd, bool flag)
 
 Socket::~Socket()
 {
+    #ifdef WIN32
+	    WSACleanup();
+    #endif
 	free(buffer);
 }
 
@@ -282,6 +282,3 @@ void Socket::clearBuffer()
 		buffer_size = 0;
 	}
 }
-
-}
-

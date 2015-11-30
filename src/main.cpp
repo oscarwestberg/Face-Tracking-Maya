@@ -3,11 +3,24 @@
 #include "opencv2/highgui/highgui.hpp"
 #include <iostream>
 
+#include "Socket.h"
+
 using namespace cv;
 using namespace std;
 
+/*
+1. Run the following mel-script in Maya: ' commandPort -n ":5055"; '
+2. Run the program
+3. Maya terminal should print "Hello Maya!"
+*/
+
 int main(int argc, char* argv[])
 {
+    Socket mayaSocket;
+    mayaSocket.connect("localhost", 5055);
+    mayaSocket.send("print \"Hello Maya!\"");
+
+
     VideoCapture cap(0); // open the video camera no. 0
 
     if (!cap.isOpened())  // if not success, exit program
