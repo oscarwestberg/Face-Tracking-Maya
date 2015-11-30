@@ -20,15 +20,17 @@ using namespace std;
 void detectAndShow(Mat frame)
 {
     SimpleBlobDetector::Params params;
-//    params.filterByColor = 1; // Blob color, 0 black, 255 white
-//    params.blobColor = 0.2;
-//    params.filterByArea = 1; // How many pixels min/max a blob can have
-    //        params.minArea = 5;
-//    params.maxArea = 150;
-    //        params.filterByCircularity = true; // Circle has circularity of 1, square has 0.785
-    //        params.minCircularity = 0.9;
+    params.filterByColor = true; // Blob color, 0 black, 1 white
+    params.blobColor = 0.0;
+    params.filterByArea = true; // How many pixels min/max a blob can have
+    params.minArea = 80;
+    params.maxArea = 250;
+    params.filterByCircularity = true; // Circle has circularity of 1, square has 0.785
+    params.minCircularity = 0.7;
     params.filterByConvexity = true; // How convex/concave blobs can be
     params.minConvexity = 0.90;
+    params.filterByInertia = true;
+    params.minInertiaRatio = 0.1;
     
     SimpleBlobDetector detector(params);
     std::vector<KeyPoint> keypoints;
