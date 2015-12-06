@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <queue>
+#include <ctime>
 
 #include "Socket.h"
 
