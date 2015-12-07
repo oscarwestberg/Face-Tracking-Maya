@@ -124,7 +124,7 @@ class Socket
 		 * @param msg Message to send
 		 * @return How much chars where sent
 		 */
-		int send(std::string& msg);
+		int send(const std::string& msg);
 		
 		/**
 		 * Blocks and send all the message.

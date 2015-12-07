@@ -123,7 +123,7 @@ void Socket::connect(const char* server, int port)
     if(n == -1) error(n);
 }
 
-int Socket::send(std::string& msg)
+int Socket::send(const std::string& msg)
 {
 	int ret;
  	ret = ::send(sockfd, msg.c_str(), msg.size(), 0);
