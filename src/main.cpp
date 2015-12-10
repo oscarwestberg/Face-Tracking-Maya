@@ -14,22 +14,13 @@
 using namespace cv;
 using namespace std;
 
-/*
- 1. Run the following mel-script in Maya: ' commandPort -n ":5055"; '
- 2. Run the program
- 3. Maya terminal should print "Hello Maya!"
- */
-
-
 // Global variables
 
 // Cascades
 String face_cascade_name = "data/haarcascade_frontalface_alt.xml";
-String eyes_cascade_name = "data/frontalEyes35x16.xml";
-String noses_cascade_name = "data/Nariz.xml";
+String eyes_cascade_name = "data/ojoI.xml";
 CascadeClassifier face_cascade;
 CascadeClassifier eyes_cascade;
-CascadeClassifier noses_cascade;
 
 // Frames
 Mat frame;
@@ -37,42 +28,20 @@ Mat frame_gray;
 
 // Data for previous frames
 #define SIZE 5
-#define MAX_DIST 200
+#define MAX_DIST 1000
 
-Rect faceData;
-Rect eyeData;
-Rect noseData;
+Point2f savedFacePosition;
+vector<Point2f> savedEyePositions;
 
-float distance(Rect r1, Rect r2) {
-    Point2f p1(r1.x, r1.y);
+// Not currently used, may be used later to make sure a new position
+// doesn't jump too far from the previous
+float distance(Point p1, Rect r2) {
     Point2f p2(r2.x, r2.y);
     
     float dx = p1.x - p2.x;
     float dy = p1.y - p2.y;
     
     return sqrt(dx * dx + dy * dy);
-}
-
-void handleData(std::vector<Rect> &rects, Rect &data) {
-
-    // If the vector is empty, use an old value
-    if (rects.empty()) {
-        // if faceData has been initialized
-        if (data.x > 0) {
-            printf("There is data: %i, %i\n", data.x, data.y);
-            rects[0] = data;
-            printf("1\n");
-        } else {
-            printf("Nothing exists\n");
-        }
-    } else {
-        // Pick the best value among the ones avaiable
-        printf("Saving: %i, %i\n", rects[0].x, rects[0].y);
-        data = rects[0];
-        printf("2\n");
-    }
-    
-    // Is there a point close to the estimate?
 }
 
 // Uses SimpleBlobDetector
@@ -89,20 +58,37 @@ void detectAndShow()
     cvtColor( frame, frame_gray, COLOR_BGR2GRAY );
     equalizeHist( frame_gray, frame_gray );
     
-    face_cascade.detectMultiScale( frame_gray, faces, 1.3, 5, 0|CASCADE_SCALE_IMAGE, Size(30, 30));
-    handleData(faces, faceData);
+    face_cascade.detectMultiScale( frame_gray, faces, 1.2, 10, 0|CASCADE_SCALE_IMAGE, Size(200, 200));
     
     if (!faces.empty()) {
+        savedFacePosition = Point2f(faces[0].x + faces[0].width/2, faces[0].y + faces[0].height/2);
+        
         Mat faceROI = frame_gray( faces[0] );
 
         // Detect eyes
-        eyes_cascade.detectMultiScale( faceROI, eyes, 1.1, 8, 0 |CASCADE_SCALE_IMAGE, Size(20, 20) );
-    //    handleData(eyes, eyeData);
+        eyes_cascade.detectMultiScale( faceROI, eyes, 2.0, 10, 0 |CASCADE_SCALE_IMAGE, Size(40, 40), Size(80,80));
         
-        // Detect nose
-        noses_cascade.detectMultiScale( faceROI, noses, 1.1, 10, 0 |CASCADE_SCALE_IMAGE, Size(20, 20) );
-    //    handleData(noses, noseData);
+        // Found two eyes
+        if (eyes.size() > 1) {
+            // eyes[0] should be the left (in image) eye
+            if (eyes[0].x > eyes[1].x) {
+                Rect temp = eyes[0];
+                eyes[0] = eyes[1];
+                eyes[1] = temp;
+            }
+            
+            // Use saved position if eye jumps to far
+            
+            savedEyePositions.erase(savedEyePositions.begin());
+            savedEyePositions.erase(savedEyePositions.begin());
+            
+            savedEyePositions.push_back(Point2f(faces[0].x + eyes[0].x + eyes[0].width/2,
+                                                faces[0].y + eyes[0].y + eyes[0].height/2 ));
+            savedEyePositions.push_back(Point2f(faces[0].x + eyes[1].x + eyes[1].width/2,
+                                                faces[0].y + eyes[1].y + eyes[1].height/2 ));
+        }
     }
+    
 
 
     // ------------------------------------------------------
@@ -133,9 +119,16 @@ void detectAndShow()
     // ------------------------------------------------------
     // Draw image and locations
     // ------------------------------------------------------
+    int size = 4;
+    
+    ellipse( frame, savedFacePosition, Size( size, size ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+    ellipse( frame, savedEyePositions[0], Size( size, size ), 0, 0, 360, Scalar( 0, 255, 255 ), 4, 8, 0 );
+    ellipse( frame, savedEyePositions[1], Size( size, size ), 0, 0, 360, Scalar( 0, 0, 255 ), 4, 8, 0 );
+    
+    /*
     // Draw face
     for ( size_t i = 0; i < faces.size(); i++ ) {
-        printf("Pos: %i, %i\n", faces[0].x, faces[0].y);
+//        printf("Pos: %i, %i\n", faces[0].x, faces[0].y);
         Point center( faces[i].x + faces[i].width/2, faces[i].y + faces[i].height/2 );
         ellipse( frame, center, Size( faces[i].width/2, faces[i].height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
     }
@@ -146,13 +139,7 @@ void detectAndShow()
         int radius = cvRound( (eyes[j].width + eyes[j].height) * 0.25 );
         circle( frame, eye_center, radius, Scalar( 255, 0, 0 ), 4, 8, 0 );
     }
-    
-    // Draw nose
-    for ( size_t j = 0; j < noses.size(); j++ ) {
-        Point nose_center( faces[0].x + noses[j].x + noses[j].width/2, faces[0].y + noses[j].y + noses[j].height/2 );
-        int radius = cvRound( (noses[j].width + noses[j].height) * 0.25 );
-        circle( frame, nose_center, radius, Scalar( 0, 255, 0 ), 4, 8, 0 );
-    }
+     */
     
     /*
     // Draw blobs
@@ -181,7 +168,10 @@ int main(int argc, char* argv[])
     // Load cascade xml files
     if( !face_cascade.load( face_cascade_name ) ){ printf("--(!)Error loading face cascade\n"); return -1; };
     if( !eyes_cascade.load( eyes_cascade_name ) ){ printf("--(!)Error loading eyes cascade\n"); return -1; };
-    if( !noses_cascade.load( noses_cascade_name ) ){ printf("--(!)Error loading eyes cascade\n"); return -1; };
+    
+    savedFacePosition = Point2f(0,0);
+    savedEyePositions.push_back(Point2f(0,0));
+    savedEyePositions.push_back(Point2f(0,0));
     
     VideoCapture cap(0); // open the video camera no. 0
     
