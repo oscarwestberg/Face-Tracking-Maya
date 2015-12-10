@@ -1,0 +1,2 @@
+sphere -n testsphere;
+commandPort -n ":5055";
