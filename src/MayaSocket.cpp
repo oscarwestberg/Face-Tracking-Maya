@@ -17,14 +17,20 @@ MayaSocket::~MayaSocket() {
 
 }
 
-bool MayaSocket::send(const std::string& cmd) {
+bool MayaSocket::send(TrackingData &data) {
+    /*
+    std::string cmd = "";
     try {
-        internal_socket.send(cmd);
+        if(internal_socket.send(cmd) < cmd.length()) {
+            std::cout << "full message not sent!" << std::endl;
+        }
         return true;
     } catch (int e) {
         connect();
         return false;
     }
+    */
+    return true;
 }
 
 bool MayaSocket::isConnected() {

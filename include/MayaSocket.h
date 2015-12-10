@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include "Socket.h"
+#include "TrackingData.h"
 
 class MayaSocket
 {
@@ -10,7 +11,7 @@ class MayaSocket
 		MayaSocket();
         virtual ~MayaSocket();
 
-        bool send(const std::string& cmd);
+        bool send(TrackingData &data);
         bool isConnected();
 
 	private:
