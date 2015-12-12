@@ -2,16 +2,13 @@
 
 #include <iostream>
 
-#define ROUND_STICKER_MARKER 1
+#define ROUND_STICKER_MARKER 0
+#define MAX_DIST 20
 
-// Not currently used
-float distance(cv::Rect r1, cv::Rect r2) {
-    cv::Point2f p1(r1.x, r1.y);
-    cv::Point2f p2(r2.x, r2.y);
-    
+float distance(cv::Point2f p1, cv::Point2f p2) {
     float dx = p1.x - p2.x;
     float dy = p1.y - p2.y;
-    
+
     return sqrt(dx * dx + dy * dy);
 }
 
@@ -71,42 +68,42 @@ bool keySortSmallY(KeyPoint k1, KeyPoint k2) {
 }
 
 bool FaceTracker::detectAndShow(Mat& frame) {
-    //###########
-    //DETECT FACE
-    //###########
+    
+    // ###########
+    // DETECT FACE
+    // ###########
     std::vector<Rect> faces;
     Mat frame_gray = frame;
     
     face_cascade.detectMultiScale( frame_gray, faces, 1.2, 10, 0|CASCADE_SCALE_IMAGE, Size(200, 200));
     
-    //############
-    //FILTER IMAGE
-    //############
-    if (faces.empty()) {
+    // ############
+    // FILTER IMAGE
+    // ############
+    if (!faces.empty()) {
+        savedFacePosition = faces[0];
+        hasFoundFace = true;
+    } else if (!hasFoundFace) {
         return false;
     }
 
-
     rectangle(frame, Point2f(savedFacePosition.x, savedFacePosition.y), Size(savedFacePosition.x + savedFacePosition.width, savedFacePosition.y + savedFacePosition.height), Scalar( 255, 100, 255 ));
-    // Save face position if we can't find it the next frame
-    savedFacePosition = faces[0];
 
     // Cut out face part of image
     Rect temp = savedFacePosition;
-    temp.height = min(temp.height + 100, frame.rows - temp.y);
+    temp.height = min(temp.height + 50, frame.rows - temp.y);
     Mat faceROI = frame(temp).clone();
     cvtColor( faceROI, faceROI, COLOR_BGR2HSV );
         
     // Detect paper of specific color
-    float thresholdH = 15, thresholdS = 50, thresholdV = 150;
+    float thresholdH = 15, thresholdS = 50, thresholdV = 250;
         
     inRange(faceROI,
             Scalar(H - thresholdH, S - thresholdS, V - thresholdV),
             Scalar(H + thresholdH, S + thresholdS, V + thresholdV),
             faceROI);
-
         
-    //uniform size
+    // Uniform size
     float det_width = 300;
     float det_height = 500;
     resize(faceROI, faceROI, Size(det_width,det_height), INTER_CUBIC);
@@ -114,9 +111,9 @@ bool FaceTracker::detectAndShow(Mat& frame) {
     threshold(faceROI,faceROI,50,255,THRESH_BINARY);
 
 
-    //##############
-    //DETECT MARKERS
-    //##############
+    // ##############
+    // DETECT MARKERS
+    // ##############
 
     // Find markers in faceROI
     std::vector<KeyPoint> keypoints;
@@ -131,20 +128,57 @@ bool FaceTracker::detectAndShow(Mat& frame) {
         keypoints.at(i).pt.y *= scale_h;
         keypoints.at(i).pt.y += savedFacePosition.y;
     }
+    
+    
+    // If keypoints has the wrong size, try to correct
+    if (keypoints.size() != 12) {
         
+        // There are no saved keypoints either
+        if (savedKeypoints.empty()) {
+            return false;
+        }
+
+        std::vector<KeyPoint> tempKeypoints;
+        
+        // Loop through saved keypoints
+        for (int i = 0; i < 12; i++) {
+            KeyPoint tempPoint = savedKeypoints[i];
+            float closestDist = 99999.0;
+            
+            // Loop through all found keypoints
+            for (int j = 0; j < keypoints.size(); j++) {
+                float dist = distance(tempPoint.pt, keypoints[j].pt);
+                
+                // If we found a better candidate, change tempPoint to this
+                if (dist < MAX_DIST && dist < closestDist) {
+                    closestDist = dist;
+                    tempPoint = keypoints[j];
+                }
+            }
+            
+            tempKeypoints.push_back(tempPoint);
+        }
+        
+        // Clear keypoints
+        // Fill keypoints with values from tempKeypoints
+        keypoints.clear();
+        for (int i = 0; i < 12; i++) {
+            keypoints.push_back(tempKeypoints[i]);
+        }
+    }
+    
+    
+    // Display keypoints in frame
     drawKeypoints( frame, keypoints, frame, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+    
+    // Save keypoints
+    savedKeypoints.clear();
+    for (int i = 0; i < 12; i++) {
+        savedKeypoints.push_back(keypoints[i]);
+    }
 
     imshow("Filtered", faceROI);
 
-    //should detect exactly 12 points
-    if(keypoints.size() != 12) {
-        return false;
-    }
-
-    //which keypoint is which?
-    int keyIndex = 0;
-    std::sort(keypoints.begin(), keypoints.end(), keySortSmallY);
-    
     TrackingData *face_data;
     if (face_rest_captured) {
         face_data = &face_move_data;
@@ -152,6 +186,10 @@ bool FaceTracker::detectAndShow(Mat& frame) {
         face_data = &face_rest_data;
         face_rest_captured = true;
     }
+    
+    //which keypoint is which?
+    int keyIndex = 0;
+    std::sort(keypoints.begin(), keypoints.end(), keySortSmallY);
 
     //brows
     std::sort(keypoints.begin(), keypoints.begin()+4, keySortSmallX);
@@ -176,7 +214,7 @@ bool FaceTracker::detectAndShow(Mat& frame) {
     face_data->leftmouth = keypoints[keyIndex++].pt - face_rest_data.leftmouth;
     face_data->lowerlip = keypoints[keyIndex++].pt - face_rest_data.lowerlip;
     face_data->rightmouth = keypoints[keyIndex++].pt - face_rest_data.rightmouth;
-
+    
     face_rest_data.draw(frame);
     return true;
 }

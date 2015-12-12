@@ -7,25 +7,23 @@
 using namespace cv;
 struct TrackingData {
     TrackingData() {
-        Point2f leftouterbrow = Point2f(0,0);
-        Point2f leftinnerbrow = Point2f(0,0);
-        Point2f rightinnerbrow = Point2f(0,0);
-        Point2f rightouterbrow = Point2f(0,0);
+        leftouterbrow = Point2f(0,0);
+        leftinnerbrow = Point2f(0,0);
+        rightinnerbrow = Point2f(0,0);
+        rightouterbrow = Point2f(0,0);
 
-        Point2f leftcheek = Point2f(0,0);
-        Point2f rightcheek = Point2f(0,0);
+        leftcheek = Point2f(0,0);
+        rightcheek = Point2f(0,0);
 
-        Point2f leftnose = Point2f(0,0);
-        Point2f rightnose = Point2f(0,0);
+        leftnose = Point2f(0,0);
+        rightnose = Point2f(0,0);
 
-        Point2f upperlip = Point2f(0,0);
+        upperlip = Point2f(0,0);
+        leftmouth = Point2f(0,0);
+        rightmouth = Point2f(0,0);
+        lowerlip = Point2f(0,0);
 
-        Point2f leftmouth = Point2f(0,0);
-        Point2f rightmouth = Point2f(0,0);
-
-        Point2f lowerlip = Point2f(0,0);
-
-        float timeStep = -1;
+        timeStep = -1;
     }
 
     Point2f leftouterbrow;

@@ -31,3 +31,6 @@ A plugin for maya tracking a face using markers and animating a 3D face-mesh bas
 * Local coordinate system based on head position (you need to keep your head very still for this version to work properly)
 * Stabilize tracking
 * Smarter tracking (right now it skips frames without the right number of keypoints and doesn't really know if a point is good or not)
+
+# Resources
+* [3D Model](http://tf3dm.com/3d-model/lord-voldemort-13066.html)  

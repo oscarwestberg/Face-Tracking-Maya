@@ -34,10 +34,12 @@ class FaceTracker
         Ptr<SimpleBlobDetector> marker_detector;
 
         Rect savedFacePosition;
-
-        TrackingData face_rest_data;
+        std::vector<KeyPoint> savedKeypoints;
+    
+        bool hasFoundFace = false;
         bool face_rest_captured;
 
+        TrackingData face_rest_data;
         TrackingData face_move_data;
 };
 

@@ -24,7 +24,9 @@ MayaSocket::~MayaSocket() {
 
 std::string transMelCmd(std::string name, Point2f pos) {
     //FULKOD! borde kanske basera skalning på något annat, typ ansiktsbredd istället för att bara dela med godtyckligt tal? kanske göra det möjligt att välja för olika delar av ansiktet?
-    return "setAttr " + name + ".translateX " + std::to_string(pos.x/400) + ";\n setAttr " + name + ".translateY " + std::to_string(-pos.y/400) + ";\n";
+    // Ja tack!
+    float modifier = 1.0/100.0;
+    return "setAttr " + name + ".translateX " + std::to_string(pos.x * modifier) + ";\n setAttr " + name + ".translateY " + std::to_string(-pos.y * modifier) + ";\n";
 }
 
 int frm = 0;
