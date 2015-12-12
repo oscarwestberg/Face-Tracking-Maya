@@ -19,18 +19,26 @@ class FaceTracker
 		FaceTracker();
         virtual ~FaceTracker();
 
-        void detectAndShow(Mat& frame);
+        bool detectAndShow(Mat& frame);
         void reset();
 
-        TrackingData getTrackingData();
+        TrackingData& getTrackingData();
 
 	private:
+        //marker color
+        float H, S, V;
+
         cv::CascadeClassifier face_cascade;
         cv::CascadeClassifier eyes_cascade;
 
         Ptr<SimpleBlobDetector> marker_detector;
 
         Rect savedFacePosition;
+
+        TrackingData face_rest_data;
+        bool face_rest_captured;
+
+        TrackingData face_move_data;
 };
 
 #endif 	/* FACETRACKER_H */

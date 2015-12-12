@@ -1,0 +1,27 @@
+commandPort -n ":5055";
+
+spaceLocator -n "lob";
+spaceLocator -n "lib";
+spaceLocator -n "rib";
+spaceLocator -n "rob";
+spaceLocator -n "lc";
+spaceLocator -n "rc";
+spaceLocator -n "ln";
+spaceLocator -n "rn";
+spaceLocator -n "ul";
+spaceLocator -n "lm";
+spaceLocator -n "rm";
+spaceLocator -n "ll";
+
+parentConstraint -mo lob leftouterbrow;
+parentConstraint -mo lib leftinnerbrow;
+parentConstraint -mo rib rightinnerbrow;
+parentConstraint -mo rob rightouterbrow;
+parentConstraint -mo lc leftcheek;
+parentConstraint -mo rc rightcheek;
+parentConstraint -mo ln leftnose;
+parentConstraint -mo rn rightnose;
+parentConstraint -mo lm leftmouth;
+parentConstraint -mo ul upperlip;
+parentConstraint -mo rm rightmouth;
+parentConstraint -mo ll lowerlip;

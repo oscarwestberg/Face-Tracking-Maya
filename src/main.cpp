@@ -27,13 +27,16 @@ int main(int argc, char* argv[])
         cout << "Cannot open the video cam" << endl;
         return -1;
     }
-    namedWindow("MyVideo",CV_WINDOW_AUTOSIZE);
+    namedWindow("Webcam",CV_WINDOW_AUTOSIZE);
+    namedWindow("Filtered",CV_WINDOW_AUTOSIZE);
 
     // Setup FPS calculation
     int framecount = 0;
     std::clock_t start;
     double duration;
     start = std::clock();
+
+    float time = 0;
     
     // ------------------------------------------------------
     // Main loop
@@ -45,12 +48,21 @@ int main(int argc, char* argv[])
             break;
         }
         
+        //mirror frame
+        flip(frame, frame, 1);
+
         //track markers
-        tracker.detectAndShow(frame);
+        bool new_data_available = tracker.detectAndShow(frame);
+        imshow("Webcam", frame );
 
         //send to maya
-        TrackingData data = tracker.getTrackingData();
-        maya.send(data);
+        if (new_data_available) {
+            TrackingData &data = tracker.getTrackingData();
+            float currTime = std::clock()/(float) CLOCKS_PER_SEC;
+            data.timeStep = currTime - time;
+            time = currTime;
+            maya.send(data);
+        }
 
         //handle input
         char key = waitKey(10);
@@ -62,6 +74,7 @@ int main(int argc, char* argv[])
             cout << "tracking reset" << endl;
         }
 
+        
         // Calculate FPS
         framecount++;
         duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;

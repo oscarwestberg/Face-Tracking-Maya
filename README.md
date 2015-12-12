@@ -5,4 +5,23 @@ A plugin for maya tracking a face using markers and animating a 3D face-mesh bas
 * [Aron Tornberg](https://github.com/AronTornberg)  
 * [Oscar Westberg](http://oscarwestberg.github.io)  
 
-Currently this [tutorial](http://docs.opencv.org/3.0-last-rst/doc/tutorials/introduction/linux_gcc_cmake/linux_gcc_cmake.html) is implemented
+# How to use
+* Open a face-rig in Maya with joints named as follows. Also add corresponding markers to your own face:
+![](https://github.com/oscarwestberg/Face-Tracking-Maya/raw/master/rigreference.jpg)
+	1. leftouterbrow
+	2. leftinnerbrow
+	3. rightinnerbrow
+	4. rightouterbrow
+	5. leftcheek
+	6. rightcheek
+	7. leftnose
+	8. rightnose
+	9. leftmouth
+	10. upperlip
+	11. rightmouth
+	12. lowerlip
+
+* Run the FaceTracker.mel script in Maya.
+* Run Face-Tracking-Maya.exe
+* The program assumes that you have a neutral expression when it first sees you. To set a new neutral expression press r to reset t tracking.
+* Press p to toggle recording on and off.
