@@ -25,3 +25,6 @@ parentConstraint -mo lm leftmouth;
 parentConstraint -mo ul upperlip;
 parentConstraint -mo rm rightmouth;
 parentConstraint -mo ll lowerlip;
+
+currentTime 1;
+setKeyframe lob lib rib rob lc rc ln rn lm ul rm ll;

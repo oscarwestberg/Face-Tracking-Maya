@@ -36,19 +36,36 @@ int main(int argc, char* argv[])
     double duration;
     start = std::clock();
 
+    bool record = false;
+
     float time = 0;
     
     // ------------------------------------------------------
     // Main loop
     // ------------------------------------------------------
     while (true) {
+        //handle input
+        char key = waitKey(1);
+        if (key == 27) {
+            cout << "esc key is pressed by user" << endl;
+            break;
+        } else if (key == 'r') {
+            tracker.reset();
+            cout << "tracking reset" << endl;
+        } else if (key == 'p') {
+            record = !record;
+            if(record)
+                cout << "recording ON" << endl;
+            else
+                cout << "recording OFF" << endl;
+        }
+
+        //record frame
         Mat frame;
         if (!cap.read(frame)) {
             cout << "Cannot read a frame from video stream" << endl;
             break;
         }
-        
-        //mirror frame
         flip(frame, frame, 1);
 
         //track markers
@@ -56,7 +73,7 @@ int main(int argc, char* argv[])
         imshow("Webcam", frame );
 
         //send to maya
-        if (new_data_available) {
+        if (new_data_available && record) {
             TrackingData &data = tracker.getTrackingData();
             float currTime = std::clock()/(float) CLOCKS_PER_SEC;
             data.timeStep = currTime - time;
@@ -64,17 +81,6 @@ int main(int argc, char* argv[])
             maya.send(data);
         }
 
-        //handle input
-        char key = waitKey(10);
-        if (key == 27) {
-            cout << "esc key is pressed by user" << endl;
-            break;
-        } else if (key == 'r') {
-            tracker.reset();
-            cout << "tracking reset" << endl;
-        }
-
-        
         // Calculate FPS
         framecount++;
         duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
