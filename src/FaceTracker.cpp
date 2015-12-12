@@ -120,19 +120,32 @@ bool FaceTracker::detectAndShow(Mat& frame) {
 
     // Find markers in faceROI
     std::vector<KeyPoint> keypoints;
+    
     marker_detector->detect(faceROI, keypoints);
-        
+
     // Map in frame instead of faceROI
     float scale_w = temp.width/det_width;
     float scale_h = temp.height/det_height;
     for (int i = 0; i < keypoints.size(); i++) {
+        /*
         keypoints.at(i).pt.x *= scale_w;
         keypoints.at(i).pt.x += savedFacePosition.x;
         keypoints.at(i).pt.y *= scale_h;
         keypoints.at(i).pt.y += savedFacePosition.y;
+        */
+        
+        Point2f pt = keypoints.at(i).pt;
+        pt.x *= scale_w;
+        pt.x += savedFacePosition.x;
+        pt.y *= scale_h;
+        pt.y += savedFacePosition.y;
+        float size_w = keypoints.at(i).size * scale_w/2;
+        float size_h = keypoints.at(i).size * scale_h/2;
+        ellipse(frame,pt,Size(size_h,size_w),0,0,360,Scalar(0,0,255));
+        
     }
         
-    drawKeypoints( frame, keypoints, frame, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+    drawKeypoints( faceROI, keypoints, faceROI, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 
     imshow("Filtered", faceROI);
 
@@ -177,7 +190,7 @@ bool FaceTracker::detectAndShow(Mat& frame) {
     face_data->lowerlip = keypoints[keyIndex++].pt - face_rest_data.lowerlip;
     face_data->rightmouth = keypoints[keyIndex++].pt - face_rest_data.rightmouth;
 
-    face_rest_data.draw(frame);
+    face_rest_data.draw(faceROI);
     return true;
 }
 
