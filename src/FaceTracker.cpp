@@ -117,22 +117,36 @@ bool FaceTracker::detectAndShow(Mat& frame) {
 
     // Find markers in faceROI
     std::vector<KeyPoint> keypoints;
+    
     marker_detector->detect(faceROI, keypoints);
-        
+
     // Map in frame instead of faceROI
     float scale_w = temp.width/det_width;
     float scale_h = temp.height/det_height;
     for (int i = 0; i < keypoints.size(); i++) {
+        
         keypoints.at(i).pt.x *= scale_w;
         keypoints.at(i).pt.x += savedFacePosition.x;
         keypoints.at(i).pt.y *= scale_h;
         keypoints.at(i).pt.y += savedFacePosition.y;
+        
+        /*
+        Point2f pt = keypoints.at(i).pt;
+        pt.x *= scale_w;
+        pt.x += savedFacePosition.x;
+        pt.y *= scale_h;
+        pt.y += savedFacePosition.y;
+        float size_w = keypoints.at(i).size * scale_w/2;
+        float size_h = keypoints.at(i).size * scale_h/2;
+        ellipse(frame,pt,Size(size_h,size_w),0,0,360,Scalar(0,0,255));
+        */
+        
     }
     
     
     // If keypoints has the wrong size, try to correct
     if (keypoints.size() != 12) {
-        
+
         // There are no saved keypoints either
         if (savedKeypoints.empty()) {
             return false;
