@@ -8,18 +8,18 @@ A plugin for maya tracking a face using markers and animating a 3D face-mesh bas
 # How to use
 * Open a face-rig in Maya with joints named as follows. Also add corresponding markers to your own face:
 ![](https://github.com/oscarwestberg/Face-Tracking-Maya/raw/master/rigreference.jpg)
-1. leftouterbrow
-2. leftinnerbrow
-3. rightinnerbrow
-4. rightouterbrow
-5. leftcheek
-6. rightcheek
-7. leftnose
-8. rightnose
-9. leftmouth
-10. upperlip
-11. rightmouth
-12. lowerlip
+	1. leftouterbrow
+	2. leftinnerbrow
+	3. rightinnerbrow
+	4. rightouterbrow
+	5. leftcheek
+	6. rightcheek
+	7. leftnose
+	8. rightnose
+	9. leftmouth
+	10. upperlip
+	11. rightmouth
+	12. lowerlip
 
 * Run the FaceTracker.mel script in Maya.
 * Run Face-Tracking-Maya.exe
