@@ -33,23 +33,23 @@ int frm = 0;
 bool MayaSocket::send(TrackingData &data) {
     std::string cmd = "";
 
-    cmd += transMelCmd("lob",data.leftouterbrow);
-    cmd += transMelCmd("lib",data.leftinnerbrow);
-    cmd += transMelCmd("rib",data.rightinnerbrow);
-    cmd += transMelCmd("rob",data.rightouterbrow);
+    cmd += transMelCmd("lob",data.markers[LEFTOUTERBROW]);
+    cmd += transMelCmd("lib",data.markers[LEFTINNERBROW]);
+    cmd += transMelCmd("rib",data.markers[RIGHTINNERBROW]);
+    cmd += transMelCmd("rob",data.markers[RIGHTOUTERBROW]);
 
-    cmd += transMelCmd("lc",data.leftcheek);
-    cmd += transMelCmd("rc",data.rightcheek);
+    cmd += transMelCmd("lc",data.markers[LEFTCHEEK]);
+    cmd += transMelCmd("rc",data.markers[RIGHTCHEEK]);
 
-    cmd += transMelCmd("ln",data.leftnose);
-    cmd += transMelCmd("rn",data.rightnose);
+    cmd += transMelCmd("ln",data.markers[LEFTNOSE]);
+    cmd += transMelCmd("rn",data.markers[RIGHTNOSE]);
 
-    cmd += transMelCmd("ul",data.upperlip);
+    cmd += transMelCmd("ul",data.markers[UPPERLIP]);
 
-    cmd += transMelCmd("lm",data.leftmouth);
-    cmd += transMelCmd("rm",data.rightmouth);
+    cmd += transMelCmd("lm",data.markers[LEFTMOUTH]);
+    cmd += transMelCmd("rm",data.markers[RIGHTMOUTH]);
     
-    cmd += transMelCmd("ll",data.lowerlip);
+    cmd += transMelCmd("ll",data.markers[LOWERLIP]);
     
     //cmd += "currentTime " + std::to_string(frm++) + ";\n";
     //cmd += "currentTime (`currentTime -query` + " + std::to_string(data.timeStep*24) + ");\n";

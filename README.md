@@ -20,6 +20,7 @@ A plugin for maya tracking a face using markers and animating a 3D face-mesh bas
 	10. upperlip
 	11. rightmouth
 	12. lowerlip
+Also add a markers on your forehead and nose.
 
 * Run the FaceTracker.mel script in Maya.
 * Run Face-Tracking-Maya.exe

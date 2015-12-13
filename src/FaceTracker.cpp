@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#define ROUND_STICKER_MARKER 0
+#define ROUND_STICKER_MARKER 1
 #define MAX_DIST 20
 
 float distance(cv::Point2f p1, cv::Point2f p2) {
@@ -15,7 +15,8 @@ float distance(cv::Point2f p1, cv::Point2f p2) {
 
 FaceTracker::FaceTracker() {
     String face_cascade_name = "data/haarcascade_frontalface_alt.xml";
-    
+    hasFoundFace = false;
+
     // Load cascade xml files
     if( !face_cascade.load( face_cascade_name ) ) perror("--(!)Error loading face cascade\n");
     savedFacePosition = Rect();
@@ -35,6 +36,7 @@ FaceTracker::FaceTracker() {
     params.filterByInertia = false;
     params.minInertiaRatio = 0.1;
     H = 176 / 2.0; S = 57 * 2.55; V = 75 * 2.55; //teal markers
+    thresholdH = 15; thresholdS = 50; thresholdV = 150;
 #else
     SimpleBlobDetector::Params params;
     params.filterByColor = false; // Blob color, 0 black, 255 white
@@ -49,6 +51,7 @@ FaceTracker::FaceTracker() {
     params.filterByInertia = false;
     params.minInertiaRatio = 0.1;
     H = 191 / 2.0; S = 84 * 2.55; V = 68 * 2.55; //glossy paper
+    thresholdH = 15; thresholdS = 50; thresholdV = 250;
 #endif
 
     marker_detector = SimpleBlobDetector::create(params);
@@ -96,7 +99,6 @@ bool FaceTracker::detectAndShow(Mat& frame) {
     cvtColor( faceROI, faceROI, COLOR_BGR2HSV );
         
     // Detect paper of specific color
-    float thresholdH = 15, thresholdS = 50, thresholdV = 250;
         
     inRange(faceROI,
             Scalar(H - thresholdH, S - thresholdS, V - thresholdV),
@@ -145,7 +147,9 @@ bool FaceTracker::detectAndShow(Mat& frame) {
     
     
     // If keypoints has the wrong size, try to correct
-    if (keypoints.size() != 12) {
+    if (keypoints.size() != MARKER_COUNT) {
+        //return false; //TEMPORARY FIX
+
 
         // There are no saved keypoints either
         if (savedKeypoints.empty()) {
@@ -155,7 +159,7 @@ bool FaceTracker::detectAndShow(Mat& frame) {
         std::vector<KeyPoint> tempKeypoints;
         
         // Loop through saved keypoints
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < MARKER_COUNT; i++) {
             KeyPoint tempPoint = savedKeypoints[i];
             float closestDist = 99999.0;
             
@@ -176,7 +180,7 @@ bool FaceTracker::detectAndShow(Mat& frame) {
         // Clear keypoints
         // Fill keypoints with values from tempKeypoints
         keypoints.clear();
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < MARKER_COUNT; i++) {
             keypoints.push_back(tempKeypoints[i]);
         }
     }
@@ -187,54 +191,109 @@ bool FaceTracker::detectAndShow(Mat& frame) {
     
     // Save keypoints
     savedKeypoints.clear();
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < MARKER_COUNT; i++) {
         savedKeypoints.push_back(keypoints[i]);
     }
 
     imshow("Filtered", faceROI);
-
-    TrackingData *face_data;
-    if (face_rest_captured) {
-        face_data = &face_move_data;
-    } else {
-        face_data = &face_rest_data;
-        face_rest_captured = true;
-    }
     
     //which keypoint is which?
     int keyIndex = 0;
     std::sort(keypoints.begin(), keypoints.end(), keySortSmallY);
 
+    TrackingData face_data;
+
+    //forehead
+    face_data.markers[FOREHEAD] = keypoints[keyIndex++].pt;
+
     //brows
-    std::sort(keypoints.begin(), keypoints.begin()+4, keySortSmallX);
-    face_data->leftouterbrow = keypoints[keyIndex++].pt - face_rest_data.leftouterbrow;
-    face_data->leftinnerbrow = keypoints[keyIndex++].pt - face_rest_data.leftinnerbrow;
-    face_data->rightinnerbrow = keypoints[keyIndex++].pt - face_rest_data.rightinnerbrow;
-    face_data->rightouterbrow = keypoints[keyIndex++].pt - face_rest_data.rightouterbrow;
+    std::sort(keypoints.begin()+1, keypoints.begin()+5, keySortSmallX);
+    face_data.markers[LEFTOUTERBROW] = keypoints[keyIndex++].pt;
+    face_data.markers[LEFTINNERBROW] = keypoints[keyIndex++].pt;
+    face_data.markers[RIGHTINNERBROW] = keypoints[keyIndex++].pt;
+    face_data.markers[RIGHTOUTERBROW] = keypoints[keyIndex++].pt;
 
     //cheeks
-    std::sort(keypoints.begin()+4, keypoints.begin()+6, keySortSmallX);
-    face_data->leftcheek = keypoints[keyIndex++].pt - face_rest_data.leftcheek;
-    face_data->rightcheek = keypoints[keyIndex++].pt - face_rest_data.rightcheek;
+    std::sort(keypoints.begin()+5, keypoints.begin()+7, keySortSmallX);
+    face_data.markers[LEFTCHEEK] = keypoints[keyIndex++].pt;
+    face_data.markers[RIGHTCHEEK] = keypoints[keyIndex++].pt;
 
-    //nose and upper lip
-    std::sort(keypoints.begin()+6, keypoints.begin()+9, keySortSmallX);
-    face_data->leftnose = keypoints[keyIndex++].pt - face_rest_data.leftnose;
-    face_data->upperlip = keypoints[keyIndex++].pt - face_rest_data.upperlip;
-    face_data->rightnose = keypoints[keyIndex++].pt - face_rest_data.rightnose;
+    //nose
+    std::sort(keypoints.begin()+7, keypoints.begin()+10, keySortSmallX);
+    face_data.markers[LEFTNOSE] = keypoints[keyIndex++].pt;
+    face_data.markers[NOSE] = keypoints[keyIndex++].pt;
+    face_data.markers[RIGHTNOSE] = keypoints[keyIndex++].pt;
 
-    //sides of mouth and lower lip
-    std::sort(keypoints.begin()+9, keypoints.end(), keySortSmallX);
-    face_data->leftmouth = keypoints[keyIndex++].pt - face_rest_data.leftmouth;
-    face_data->lowerlip = keypoints[keyIndex++].pt - face_rest_data.lowerlip;
-    face_data->rightmouth = keypoints[keyIndex++].pt - face_rest_data.rightmouth;
-    
-    face_rest_data.draw(frame);
+    //mouth
+    std::sort(keypoints.begin()+10, keypoints.end(), keySortSmallX);
+    face_data.markers[LEFTMOUTH] = keypoints[keyIndex++].pt;
+
+    std::sort(keypoints.begin()+11, keypoints.begin()+13, keySortSmallY);
+    face_data.markers[UPPERLIP] = keypoints[keyIndex++].pt;
+    face_data.markers[LOWERLIP] = keypoints[keyIndex++].pt;
+
+    face_data.markers[RIGHTMOUTH] = keypoints[keyIndex++].pt;
+
+    //if no rest face, save this one, with forehead at (0,0)
+    if (!face_rest_captured) {
+        for (int i = 0; i < MARKER_COUNT; i++) {
+            face_rest_data.markers[i] = face_data.markers[i] - face_data.markers[FOREHEAD];
+            face_prev_data.markers[i] = face_data.markers[i];
+        }
+        face_rest_captured = true;
+        return true;
+    }
+
+    //if to big difference from previous frame, skip
+    for (int i = 0; i < MARKER_COUNT; i++) {
+        if (distance(face_prev_data.markers[i], face_data.markers[i]) > 100) {
+            return false;
+        }
+        face_prev_data.markers[i] = face_data.markers[i];
+    }
+
+    //normalized forehead to nose vector in rest state
+    float rest_dist = distance(face_rest_data.markers[FOREHEAD], face_rest_data.markers[NOSE]);
+    Point2f fn_v_r = (face_rest_data.markers[FOREHEAD] - face_rest_data.markers[NOSE])/rest_dist;
+
+    //normalied forehead to nose vector in current state
+    float curr_dist = distance(face_data.markers[FOREHEAD], face_data.markers[NOSE]);
+    Point2f fn_v_c = (face_data.markers[FOREHEAD] - face_data.markers[NOSE])/curr_dist;
+
+    line(frame, face_data.markers[FOREHEAD], face_data.markers[NOSE], Scalar(255,255,255));
+    line(frame, face_rest_data.markers[FOREHEAD] + face_data.markers[FOREHEAD], face_rest_data.markers[NOSE] + face_data.markers[FOREHEAD], Scalar(0,255,255));
+
+    //face tilt
+    float cosTheta = fn_v_r.x*fn_v_c.x + fn_v_r.y*fn_v_c.y;
+    float sinTheta = sqrt(1.0f - cosTheta*cosTheta);
+    if(fn_v_c.x < fn_v_r.x) sinTheta = -sinTheta;
+
+    //rotate and get difference to modified rest data
+    for (int i = 0; i < MARKER_COUNT; i++) {
+        Point2f rest = face_rest_data.markers[i]/rest_dist * curr_dist;
+        rest = Point2f(rest.x*cosTheta - rest.y*sinTheta, rest.x*sinTheta + rest.y*cosTheta);
+
+        Point2f curr = face_data.markers[i] - face_data.markers[FOREHEAD];
+
+        face_move_data.markers[i] = curr - rest;
+
+        //draw
+        Point2f forehead = face_data.markers[FOREHEAD];
+        Point2f pt1 = rest + forehead;
+        Point2f pt2 = curr + forehead;
+        line(frame, pt1, pt2, Scalar(0,255,0));
+        circle(frame, pt1, 2, Scalar(255,0,0));
+        circle(frame, pt2, 2, Scalar(255,255,0));
+    }
+
     return true;
 }
 
 void FaceTracker::reset() {
     face_rest_captured = false;
+    savedFacePosition = Rect();
+    hasFoundFace = false;
+    savedKeypoints.clear();
     face_move_data = TrackingData();
     face_rest_data = TrackingData();
 }

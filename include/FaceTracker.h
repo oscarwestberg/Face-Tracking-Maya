@@ -27,6 +27,7 @@ class FaceTracker
 	private:
         //marker color
         float H, S, V;
+        float thresholdH, thresholdS, thresholdV;
 
         cv::CascadeClassifier face_cascade;
         cv::CascadeClassifier eyes_cascade;
@@ -36,10 +37,11 @@ class FaceTracker
         Rect savedFacePosition;
         std::vector<KeyPoint> savedKeypoints;
     
-        bool hasFoundFace = false;
+        bool hasFoundFace;
         bool face_rest_captured;
 
         TrackingData face_rest_data;
+        TrackingData face_prev_data;
         TrackingData face_move_data;
 };
 
