@@ -34,6 +34,10 @@ int frm = 0;
 bool MayaSocket::send(TrackingData &data) {
     std::string cmd = "";
 
+    //cmd += "currentTime " + std::to_string(frm++) + ";\n";
+    //cmd += "currentTime (`currentTime -query` + " + std::to_string(data.timeStep*24) + ");\n";
+    cmd += "currentTime (`currentTime -query` + 1);\n";
+
     cmd += transMelCmd("lob",data.markers[LEFTOUTERBROW]);
     cmd += transMelCmd("lib",data.markers[LEFTINNERBROW]);
     cmd += transMelCmd("rib",data.markers[RIGHTINNERBROW]);
@@ -52,9 +56,9 @@ bool MayaSocket::send(TrackingData &data) {
     
     cmd += transMelCmd("ll",data.markers[LOWERLIP]);
     
-    //cmd += "currentTime " + std::to_string(frm++) + ";\n";
-    //cmd += "currentTime (`currentTime -query` + " + std::to_string(data.timeStep*24) + ");\n";
-    //cmd += "setKeyframe lob lib rib rob lc rc ln rn lm ul rm ll;\n";
+    cmd += "setKeyframe lob lib rib rob lc rc ln rn lm ul rm ll;\n";
+    frm++;
+    
     try {
         if(internal_socket.send(cmd) < cmd.length()) {
             std::cout << "full message not sent!" << std::endl;
