@@ -11,6 +11,7 @@ A plugin for maya tracking a face using markers and animating a 3D face-mesh bas
 * Open a face-rig in Maya with joints named as follows:
 
 ![](https://github.com/oscarwestberg/Face-Tracking-Maya/raw/master/rigreference.jpg)
+
 	1. leftouterbrow
 	2. leftinnerbrow
 	3. rightinnerbrow
