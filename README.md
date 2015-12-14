@@ -8,7 +8,7 @@ A plugin for maya tracking a face using markers and animating a 3D face-mesh bas
 * [Oscar Westberg](http://oscarwestberg.github.io)  
 
 # How to use
-* Open a face-rig in Maya with joints named as follows. Also add corresponding markers to your own face:
+* Open a face-rig in Maya with joints named as follows:
 ![](https://github.com/oscarwestberg/Face-Tracking-Maya/raw/master/rigreference.jpg)
 	1. leftouterbrow
 	2. leftinnerbrow
@@ -23,18 +23,17 @@ A plugin for maya tracking a face using markers and animating a 3D face-mesh bas
 	11. rightmouth
 	12. lowerlip
 
-* Also add a markers on your forehead and nose.
+* Add corresponding markers to your own face + markers on your nose and forehead.
 
 * Run the FaceTracker.mel script in Maya.
 * Run Face-Tracking-Maya.exe
 * The program assumes that you have a neutral expression when it first sees you. To set a new neutral expression press r to reset t tracking.
-* Press p to toggle recording on and off.
+* Press p to toggle recording in Maya on and off.
 
 #TODO
-* Record animation in Maya
-* Local coordinate system based on head position (you need to keep your head very still for this version to work properly)
-* Stabilize tracking
-* Smarter tracking (right now it skips frames without the right number of keypoints and doesn't really know if a point is good or not)
+* Improve tracking
+* Fix bugs (marker positions will sometimes glitch out)
+* Make it more user friendly?
 
 # Resources
 * [3D Model](http://tf3dm.com/3d-model/lord-voldemort-13066.html)  
