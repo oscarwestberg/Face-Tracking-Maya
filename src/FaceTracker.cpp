@@ -268,14 +268,16 @@ bool FaceTracker::detectAndShow(Mat& frame) {
     float sinTheta = sqrt(1.0f - cosTheta*cosTheta);
     if(fn_v_c.x < fn_v_r.x) sinTheta = -sinTheta;
 
+    float trans_scale = curr_dist/rest_dist;
+
     //rotate and get difference to modified rest data
     for (int i = 0; i < MARKER_COUNT; i++) {
-        Point2f rest = face_rest_data.markers[i]/rest_dist * curr_dist;
+        Point2f rest = face_rest_data.markers[i] * trans_scale;
         rest = Point2f(rest.x*cosTheta - rest.y*sinTheta, rest.x*sinTheta + rest.y*cosTheta);
 
         Point2f curr = face_data.markers[i] - face_data.markers[FOREHEAD];
 
-        face_move_data.markers[i] = curr - rest;
+        face_move_data.markers[i] = (curr - rest)/curr_dist;
 
         //draw
         Point2f forehead = face_data.markers[FOREHEAD];
