@@ -28,14 +28,12 @@ A plugin for maya tracking a face using markers and animating a 3D face-mesh bas
 * Add corresponding markers to your own face + markers on your nose and forehead.
 
 * Run the FaceTracker.mel script in Maya.
-* Run Face-Tracking-Maya.exe
-* The program assumes that you have a neutral expression when it first sees you. To set a new neutral expression press r to reset t tracking.
-* Press p to toggle recording in Maya on and off.
 
-#TODO
-* Improve tracking
-* Fix bugs (marker positions will sometimes glitch out)
-* Make it more user friendly?
+* Run Face-Tracking-Maya.exe
+
+* The program assumes that you have a neutral expression when it first sees you. To set a new neutral expression press r to reset t tracking.
+
+* Press p to toggle recording in Maya on and off.
 
 # Resources
 * [3D Model](http://tf3dm.com/3d-model/lord-voldemort-13066.html)  
