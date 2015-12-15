@@ -25,6 +25,8 @@ A plugin for maya tracking a face using markers and animating a 3D face-mesh bas
 	11. rightmouth
 	12. lowerlip
 
+A ready made rig is provided in Volemort_rigged.mb
+
 * Add corresponding markers to your own face + markers on your nose and forehead.
 
 * Run the FaceTracker.mel script in Maya.
