@@ -27,8 +27,8 @@ FaceTracker::FaceTracker() {
     params.filterByColor = true; // Blob color, 0 black, 255 white
     params.blobColor = 255;
     params.filterByArea = true; // How many pixels min/max a blob can have
-    params.minArea = 50;
-    params.maxArea = 2000;
+    params.minArea = 100;
+    params.maxArea = 1000;
     params.filterByCircularity = true; // Circle has circularity of 1, square has 0.785
     params.minCircularity = 0.4;
     params.filterByConvexity = false; // How convex/concave blobs can be
@@ -185,53 +185,58 @@ bool FaceTracker::detectAndShow(Mat& frame) {
         }
     }
     
+    // Sort keypoints to correct order
+    std::sort(keypoints.begin(), keypoints.end(), keySortSmallY);
+    std::sort(keypoints.begin()+1, keypoints.begin()+5, keySortSmallX);
+    std::sort(keypoints.begin()+5, keypoints.begin()+7, keySortSmallX);
+    std::sort(keypoints.begin()+7, keypoints.begin()+10, keySortSmallX);
+    std::sort(keypoints.begin()+10, keypoints.end(), keySortSmallX);
+    std::sort(keypoints.begin()+11, keypoints.begin()+13, keySortSmallY);
     
-    // Display keypoints in frame
-    drawKeypoints( frame, keypoints, frame, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+    // Weight keypoints with saved ones
+    if (!savedKeypoints.empty()) {
+        for (int i = 0; i < keypoints.size(); i++) {
+            keypoints[i].pt.x = keypoints[i].pt.x * 0.7 + savedKeypoints[i].pt.x * 0.3;
+            keypoints[i].pt.y = keypoints[i].pt.y * 0.7 + savedKeypoints[i].pt.y * 0.3;
+        }
+    }
     
     // Save keypoints
     savedKeypoints.clear();
     for (int i = 0; i < MARKER_COUNT; i++) {
         savedKeypoints.push_back(keypoints[i]);
     }
-
+    
+    // Display keypoints in frame
+    drawKeypoints( frame, keypoints, frame, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
     imshow("Filtered", faceROI);
     
     //which keypoint is which?
     int keyIndex = 0;
-    std::sort(keypoints.begin(), keypoints.end(), keySortSmallY);
-
     TrackingData face_data;
 
     //forehead
     face_data.markers[FOREHEAD] = keypoints[keyIndex++].pt;
 
     //brows
-    std::sort(keypoints.begin()+1, keypoints.begin()+5, keySortSmallX);
     face_data.markers[LEFTOUTERBROW] = keypoints[keyIndex++].pt;
     face_data.markers[LEFTINNERBROW] = keypoints[keyIndex++].pt;
     face_data.markers[RIGHTINNERBROW] = keypoints[keyIndex++].pt;
     face_data.markers[RIGHTOUTERBROW] = keypoints[keyIndex++].pt;
 
     //cheeks
-    std::sort(keypoints.begin()+5, keypoints.begin()+7, keySortSmallX);
     face_data.markers[LEFTCHEEK] = keypoints[keyIndex++].pt;
     face_data.markers[RIGHTCHEEK] = keypoints[keyIndex++].pt;
 
     //nose
-    std::sort(keypoints.begin()+7, keypoints.begin()+10, keySortSmallX);
     face_data.markers[LEFTNOSE] = keypoints[keyIndex++].pt;
     face_data.markers[NOSE] = keypoints[keyIndex++].pt;
     face_data.markers[RIGHTNOSE] = keypoints[keyIndex++].pt;
 
     //mouth
-    std::sort(keypoints.begin()+10, keypoints.end(), keySortSmallX);
     face_data.markers[LEFTMOUTH] = keypoints[keyIndex++].pt;
-
-    std::sort(keypoints.begin()+11, keypoints.begin()+13, keySortSmallY);
     face_data.markers[UPPERLIP] = keypoints[keyIndex++].pt;
     face_data.markers[LOWERLIP] = keypoints[keyIndex++].pt;
-
     face_data.markers[RIGHTMOUTH] = keypoints[keyIndex++].pt;
 
     //if no rest face, save this one, with forehead at (0,0)
